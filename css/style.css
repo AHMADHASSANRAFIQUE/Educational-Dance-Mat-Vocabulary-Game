@@ -1,0 +1,560 @@
+:root {
+    --color-bg: #0f0c29;
+    --color-pink: #ff66aa;
+    --color-purple: #8c52ff;
+    --color-green: #38d9a9;
+    --color-orange: #ff914d;
+    --color-text: #ffffff;
+    --track-width: 140px;
+    --board-height: 55vh;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--color-bg);
+    color: var(--color-text);
+    font-family: 'Nunito', sans-serif;
+    overflow: hidden;
+    user-select: none;
+    height: 100vh;
+}
+
+/* ================ GAME CONTAINER ================ */
+#game-container {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    background: radial-gradient(ellipse at 50% 30%, #1a1a3e 0%, #0f0c29 70%);
+    transition: background 0.5s;
+}
+
+#game-container.fever-active {
+    background: radial-gradient(ellipse at 50% 30%, #2a1a4e 0%, #1a0c39 70%);
+}
+
+/* ================ HUD ================ */
+#hud {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 10px 16px;
+    background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 10;
+    gap: 8px;
+}
+
+.hud-item { display: flex; flex-direction: column; align-items: center; }
+
+.hud-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    opacity: 0.6;
+    font-weight: 700;
+}
+
+.hud-value {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    text-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.hud-mode-text { font-size: 16px; }
+
+.hud-controls { display: flex; gap: 6px; }
+
+.hud-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    font-size: 18px;
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center;
+}
+.hud-btn:hover { background: rgba(255,255,255,0.2); }
+.hud-btn:active { transform: scale(0.92); }
+.hud-btn.active { background: rgba(92, 225, 230, 0.3); border-color: #5ce1e6; }
+
+/* ================ PICTURE PROMPT ================ */
+#picture-prompt-area {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    min-height: 160px;
+    padding: 8px;
+}
+
+#picture-frame {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+#prompt-image {
+    max-height: 180px;
+    max-width: 280px;
+    object-fit: contain;
+    border-radius: 16px;
+    background: rgba(255,255,255,0.95);
+    padding: 10px;
+    box-shadow: 0 0 40px rgba(140, 82, 255, 0.3), 0 8px 30px rgba(0,0,0,0.4);
+    transition: opacity 0.6s ease;
+}
+
+#prompt-image.ghost-fade { opacity: 0.08; }
+
+#prompt-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 20px;
+    color: rgba(255,255,255,0.7);
+    text-shadow: 0 0 10px rgba(140, 82, 255, 0.4);
+}
+
+#feedback-text {
+    position: absolute;
+    font-family: 'Fredoka One', cursive;
+    font-size: 48px;
+    font-weight: bold;
+    text-transform: uppercase;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s, transform 0.15s;
+    z-index: 20;
+}
+
+.feedback-perfect { color: #5ce1e6; text-shadow: 0 0 25px #5ce1e6; }
+.feedback-good    { color: #84e058; text-shadow: 0 0 25px #84e058; }
+.feedback-miss    { color: #ff6688; text-shadow: 0 0 25px #ff6688; }
+
+/* ================ STATIC BOARD (Beginner) ================ */
+#static-board {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 30px 20px 40px;
+    flex-wrap: wrap;
+}
+
+.static-slot { position: relative; }
+
+.static-block {
+    width: 160px;
+    height: 90px;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+    transition: transform 0.2s, box-shadow 0.2s, opacity 0.3s;
+}
+
+.static-block:hover { transform: scale(1.05); }
+.static-block.pulse { animation: staticPulse 0.8s infinite alternate; }
+
+.static-block .block-arrow { font-size: 22px; line-height: 1; margin-bottom: 4px; opacity: 0.85; }
+.static-block .block-word { font-family: 'Fredoka One', cursive; font-size: 24px; line-height: 1; }
+
+.static-block.correct-flash {
+    transform: scale(1.15);
+    box-shadow: 0 0 40px rgba(92, 225, 230, 0.6);
+}
+.static-block.wrong-flash {
+    transform: scale(0.9);
+    opacity: 0.5;
+}
+
+/* ================ GAME BOARD (Moving/Stream) ================ */
+#game-board {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    height: var(--board-height);
+    position: relative;
+    border-top: 2px solid rgba(255,255,255,0.06);
+    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
+    padding: 0 20px;
+}
+
+.track {
+    width: var(--track-width);
+    height: 100%;
+    position: relative;
+    background: linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.02) 100%);
+    border-left: 1px solid rgba(255,255,255,0.05);
+    border-right: 1px solid rgba(255,255,255,0.05);
+}
+
+/* ================ TARGET ZONES ================ */
+.target-zone {
+    width: 100%;
+    height: 80px;
+    position: absolute;
+    top: 20px;
+    border-radius: 14px;
+    border: 2px solid rgba(255,255,255,0.15);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.08s ease-out;
+    background: rgba(255,255,255,0.03);
+}
+
+.tz-arrow { font-size: 36px; color: rgba(255,255,255,0.25); transition: color 0.08s; }
+
+.tz-pink   { border-color: rgba(255,102,170,0.25); }
+.tz-purple { border-color: rgba(140,82,255,0.25);  }
+.tz-green  { border-color: rgba(56,217,169,0.25);  }
+.tz-orange { border-color: rgba(255,145,77,0.25);  }
+
+.target-zone.active { background: rgba(255,255,255,0.12); transform: scale(0.93); }
+.tz-pink.active   { border-color: var(--color-pink);   box-shadow: 0 0 25px var(--color-pink);   }
+.tz-purple.active { border-color: var(--color-purple); box-shadow: 0 0 25px var(--color-purple); }
+.tz-green.active  { border-color: var(--color-green);  box-shadow: 0 0 25px var(--color-green);  }
+.tz-orange.active { border-color: var(--color-orange); box-shadow: 0 0 25px var(--color-orange); }
+
+/* ================ VOCAB BLOCKS (Moving) ================ */
+.vocab-block {
+    position: absolute;
+    width: 100%;
+    height: 80px;
+    border-radius: 14px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    font-weight: 800;
+    will-change: top;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.3);
+    transition: transform 0.15s, opacity 0.15s;
+}
+
+.vocab-block .block-arrow { font-size: 20px; line-height: 1; margin-bottom: 4px; opacity: 0.85; }
+.vocab-block .block-word  { font-family: 'Fredoka One', cursive; font-size: 22px; line-height: 1; }
+
+.bg-pink   { background: linear-gradient(135deg, #ff88bb 0%, #ff4499 100%); }
+.bg-purple { background: linear-gradient(135deg, #a67cff 0%, #7033ff 100%); }
+.bg-green  { background: linear-gradient(135deg, #6ee7b7 0%, #22b893 100%); }
+.bg-orange { background: linear-gradient(135deg, #ffad7a 0%, #f57220 100%); }
+
+.vocab-block.decoy-block { border: 2px dashed rgba(255,255,255,0.5); opacity: 0.85; }
+
+.vocab-block.correct-hit { transform: scale(1.15); opacity: 0; }
+.vocab-block.wrong-hit   { transform: scale(0.8); opacity: 0; }
+
+/* ================ OVERLAYS ================ */
+.overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 8, 30, 0.97);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    text-align: center;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#game-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, #5ce1e6, #8c52ff);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+#gameover-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: 3rem;
+    margin-bottom: 16px;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.4);
+}
+
+.overlay-subtitle { font-size: 16px; color: rgba(255,255,255,0.7); margin-bottom: 4px; }
+.overlay-hint     { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 16px; }
+
+/* ================ DIFFICULTY SELECTOR ================ */
+#difficulty-selector {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.diff-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 18px 24px;
+    border-radius: 18px;
+    border: 2px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 150px;
+}
+
+.diff-btn:hover { transform: translateY(-3px); }
+
+.diff-icon { font-size: 32px; }
+.diff-name { font-family: 'Fredoka One', cursive; font-size: 20px; }
+.diff-desc { font-size: 11px; opacity: 0.6; }
+
+.diff-beginner:hover      { border-color: var(--color-green);  background: rgba(56,217,169,0.15);  box-shadow: 0 0 25px rgba(56,217,169,0.3);  }
+.diff-intermediate:hover  { border-color: var(--color-purple); background: rgba(140,82,255,0.15);  box-shadow: 0 0 25px rgba(140,82,255,0.3);  }
+.diff-advanced:hover      { border-color: var(--color-orange); background: rgba(255,145,77,0.15);  box-shadow: 0 0 25px rgba(255,145,77,0.3);  }
+
+/* Glow buttons */
+.btn-glow {
+    padding: 14px 44px;
+    font-size: 22px;
+    font-family: 'Fredoka One', cursive;
+    background: linear-gradient(135deg, #5ce1e6, #8c52ff);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5), 0 0 30px rgba(140,82,255,0.2);
+    transition: transform 0.15s, box-shadow 0.15s;
+    margin-top: 20px;
+}
+.btn-glow:hover { transform: scale(1.06); }
+
+#final-score-display { display: flex; flex-direction: column; align-items: center; margin-top: 20px; }
+.final-label { font-size: 14px; text-transform: uppercase; letter-spacing: 2px; opacity: 0.5; }
+.final-value { font-family: 'Fredoka One', cursive; font-size: 56px; color: #ffd700; text-shadow: 0 0 20px rgba(255,215,0,0.4); }
+
+/* ================ FEVER MODE ================ */
+#fever-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    border: 4px solid transparent;
+    border-radius: 0;
+    transition: opacity 0.5s;
+}
+
+#fever-overlay.fever-visible {
+    border-image: linear-gradient(90deg, #ff66aa, #ffd700, #5ce1e6, #ff914d, #8c52ff, #ff66aa) 1;
+    animation: feverBorder 2s linear infinite;
+    opacity: 1;
+}
+
+#fever-banner {
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    font-family: 'Fredoka One', cursive;
+    font-size: 18px;
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255,215,0,0.5);
+    padding: 6px 20px;
+    background: rgba(0,0,0,0.6);
+    border-radius: 20px;
+    white-space: nowrap;
+    animation: feverPulse 0.8s ease infinite alternate;
+}
+
+#multiplier-badge {
+    position: absolute;
+    top: 10px;
+    right: 20px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: #ffd700;
+    text-shadow: 0 0 15px rgba(255,215,0,0.6);
+    z-index: 30;
+    animation: feverPulse 0.6s ease infinite alternate;
+}
+
+.fever-hidden { display: none !important; }
+.fever-visible { display: block !important; }
+
+/* ================ ADAPTIVE INDICATOR ================ */
+#adaptive-indicator {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 30;
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    padding: 5px 16px;
+    border-radius: 15px;
+    background: rgba(0,0,0,0.7);
+    white-space: nowrap;
+    animation: fadeSlide 1.5s ease forwards;
+}
+
+.adaptive-up   { color: #5ce1e6; border: 1px solid rgba(92,225,230,0.3); }
+.adaptive-down { color: #ff9966; border: 1px solid rgba(255,153,102,0.3); }
+
+/* ================ LEVEL UP BANNER ================ */
+#level-up-banner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 50;
+    pointer-events: none;
+}
+
+#level-up-text {
+    font-family: 'Fredoka One', cursive;
+    font-size: 38px;
+    color: #ffd700;
+    text-shadow: 0 0 30px rgba(255,215,0,0.6), 2px 2px 0 rgba(0,0,0,0.5);
+    animation: levelPop 1.2s ease-out forwards;
+}
+
+/* ================ ANALYTICS DASHBOARD ================ */
+#dashboard-panel {
+    position: absolute;
+    inset: 0;
+    background: rgba(10, 8, 30, 0.98);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.dashboard-hidden { display: none !important; }
+
+#dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+#dashboard-header h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 24px;
+    color: #5ce1e6;
+}
+
+#dashboard-body { flex: 1; overflow-y: auto; }
+
+#analytics-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+}
+
+#analytics-table th {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 2px solid rgba(255,255,255,0.15);
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: rgba(255,255,255,0.5);
+}
+
+#analytics-table td {
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+#analytics-table tr:hover td { background: rgba(255,255,255,0.04); }
+
+.accuracy-high { color: #84e058; }
+.accuracy-mid  { color: #ffd700; }
+.accuracy-low  { color: #ff6688; }
+
+#dashboard-footer {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    justify-content: flex-end;
+}
+
+.dash-btn {
+    padding: 8px 18px;
+    font-size: 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: white;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.dash-btn:hover { background: rgba(255,255,255,0.15); }
+.dash-btn-danger:hover { background: rgba(255, 80, 80, 0.25); border-color: rgba(255,80,80,0.4); }
+
+/* ================ ANIMATIONS ================ */
+@keyframes levelPop {
+    0%   { transform: scale(0.3); opacity: 0; }
+    20%  { transform: scale(1.15); opacity: 1; }
+    70%  { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1); opacity: 0; }
+}
+
+@keyframes imgPop {
+    0%   { transform: scale(0.5); opacity: 0; }
+    60%  { transform: scale(1.08); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20%      { transform: translateX(-8px); }
+    40%      { transform: translateX(8px); }
+    60%      { transform: translateX(-5px); }
+    80%      { transform: translateX(5px); }
+}
+
+@keyframes staticPulse {
+    from { box-shadow: 0 6px 18px rgba(0,0,0,0.35), inset 0 1px 1px rgba(255,255,255,0.3); }
+    to   { box-shadow: 0 6px 28px rgba(255,255,255,0.15), inset 0 1px 1px rgba(255,255,255,0.3); }
+}
+
+@keyframes feverBorder {
+    0%   { filter: hue-rotate(0deg); }
+    100% { filter: hue-rotate(360deg); }
+}
+
+@keyframes feverPulse {
+    from { opacity: 0.8; transform: translateX(-50%) scale(1); }
+    to   { opacity: 1;   transform: translateX(-50%) scale(1.04); }
+}
+
+@keyframes fadeSlide {
+    0%   { opacity: 0; transform: translateX(-50%) translateY(10px); }
+    20%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+    80%  { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+.img-pop   { animation: imgPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+.img-shake { animation: shake 0.4s ease; }

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dance Mat Vocabulary</title>
+    <meta name="description" content="An educational dance mat game that helps children learn vocabulary through interactive rhythm gameplay.">
+    <link rel="stylesheet" href="css/style.css?v=2">
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="game-container">
+
+        <!-- HUD -->
+        <div id="hud">
+            <div class="hud-item" id="hud-score">
+                <span class="hud-label">Score</span>
+                <span class="hud-value" id="score-value">0</span>
+            </div>
+            <div class="hud-item" id="hud-level">
+                <span class="hud-label">Level</span>
+                <span class="hud-value" id="level-value">1</span>
+            </div>
+            <div class="hud-item" id="hud-combo">
+                <span class="hud-label">Combo</span>
+                <span class="hud-value" id="combo-value">0</span>
+            </div>
+            <div class="hud-item" id="hud-mode">
+                <span class="hud-label">Mode</span>
+                <span class="hud-value hud-mode-text" id="mode-value">—</span>
+            </div>
+            <div class="hud-controls">
+                <button id="lang-toggle" class="hud-btn" title="Toggle Language (EN/HE)">EN</button>
+                <button id="tts-toggle" class="hud-btn" title="Toggle Text-to-Speech">🔊</button>
+                <button id="dashboard-toggle" class="hud-btn" title="Performance Dashboard">📊</button>
+            </div>
+        </div>
+
+        <!-- Fever mode overlay -->
+        <div id="fever-overlay" class="fever-hidden"></div>
+        <div id="fever-banner" class="fever-hidden">
+            <span>🔥 FEVER MODE — 2× POINTS 🔥</span>
+        </div>
+        <div id="multiplier-badge" class="fever-hidden">×2</div>
+
+        <!-- Picture prompt area -->
+        <div id="picture-prompt-area">
+            <div id="picture-frame">
+                <img id="prompt-image" src="" alt="Match this word!">
+                <div id="prompt-label">What is this?</div>
+            </div>
+            <div id="feedback-text"></div>
+        </div>
+
+        <!-- Beginner mode: static word display area -->
+        <div id="static-board" style="display:none;">
+            <div class="static-slot" data-track="left">
+                <div class="static-block bg-pink"><span class="block-arrow">←</span><span class="block-word"></span></div>
+            </div>
+            <div class="static-slot" data-track="down">
+                <div class="static-block bg-purple"><span class="block-arrow">↓</span><span class="block-word"></span></div>
+            </div>
+            <div class="static-slot" data-track="up">
+                <div class="static-block bg-green"><span class="block-arrow">↑</span><span class="block-word"></span></div>
+            </div>
+            <div class="static-slot" data-track="right">
+                <div class="static-block bg-orange"><span class="block-arrow">→</span><span class="block-word"></span></div>
+            </div>
+        </div>
+
+        <!-- Moving/Stream mode: 4 track game board -->
+        <div id="game-board" style="display:none;">
+            <div class="track" data-track="left">
+                <div class="target-zone tz-pink"><span class="tz-arrow">←</span></div>
+            </div>
+            <div class="track" data-track="down">
+                <div class="target-zone tz-purple"><span class="tz-arrow">↓</span></div>
+            </div>
+            <div class="track" data-track="up">
+                <div class="target-zone tz-green"><span class="tz-arrow">↑</span></div>
+            </div>
+            <div class="track" data-track="right">
+                <div class="target-zone tz-orange"><span class="tz-arrow">→</span></div>
+            </div>
+        </div>
+
+        <!-- Start Overlay with difficulty selector -->
+        <div id="start-overlay" class="overlay">
+            <h1 id="game-title">Dance Mat<br>Vocabulary</h1>
+            <p class="overlay-subtitle">Match the word to the picture!</p>
+            <p class="overlay-hint">Use ← ↓ ↑ → Arrow Keys or your Dance Mat</p>
+            <div id="difficulty-selector">
+                <button class="diff-btn diff-beginner" data-phase="beginner">
+                    <span class="diff-icon">🌱</span>
+                    <span class="diff-name">Beginner</span>
+                    <span class="diff-desc">Static · Learn at your pace</span>
+                </button>
+                <button class="diff-btn diff-intermediate" data-phase="intermediate">
+                    <span class="diff-icon">🎵</span>
+                    <span class="diff-name">Intermediate</span>
+                    <span class="diff-desc">Rhythm · Ghost Mode</span>
+                </button>
+                <button class="diff-btn diff-advanced" data-phase="advanced">
+                    <span class="diff-icon">⚡</span>
+                    <span class="diff-name">Advanced</span>
+                    <span class="diff-desc">Streams · Decoys</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Game Over Overlay -->
+        <div id="gameover-overlay" class="overlay" style="display:none;">
+            <h1 id="gameover-title">🎉 Great Job!</h1>
+            <p class="overlay-subtitle">You completed all levels!</p>
+            <div id="final-score-display">
+                <span class="final-label">Final Score</span>
+                <span class="final-value" id="final-score">0</span>
+            </div>
+            <button id="restart-btn" class="btn-glow">Play Again</button>
+        </div>
+
+        <!-- Level Up Banner -->
+        <div id="level-up-banner" style="display:none;">
+            <span id="level-up-text"></span>
+        </div>
+
+        <!-- Adaptive Difficulty Indicator -->
+        <div id="adaptive-indicator" style="display:none;">
+            <span id="adaptive-text"></span>
+        </div>
+
+        <!-- Performance Analytics Dashboard -->
+        <div id="dashboard-panel" class="dashboard-hidden">
+            <div id="dashboard-header">
+                <h2>📊 Performance Dashboard</h2>
+                <button id="dashboard-close" class="hud-btn">✕</button>
+            </div>
+            <div id="dashboard-body">
+                <table id="analytics-table">
+                    <thead>
+                        <tr>
+                            <th>Word</th>
+                            <th>Shown</th>
+                            <th>Correct</th>
+                            <th>Missed</th>
+                            <th>Accuracy</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analytics-tbody"></tbody>
+                </table>
+            </div>
+            <div id="dashboard-footer">
+                <button id="export-csv-btn" class="dash-btn">📥 Export CSV</button>
+                <button id="clear-data-btn" class="dash-btn dash-btn-danger">🗑 Clear Data</button>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="js/config.js?v=5"></script>
+    <script src="js/models/Analytics.js"></script>
+    <script src="js/models/GameState.js"></script>
+    <script src="js/views/GameView.js"></script>
+    <script src="js/controllers/InputController.js"></script>
+    <script src="js/controllers/GameController.js"></script>
+    <script src="js/main.js?v=5"></script>
+</body>
+</html>
