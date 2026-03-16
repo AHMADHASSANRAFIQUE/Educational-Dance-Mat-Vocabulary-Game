@@ -10,14 +10,23 @@
 
 window.addEventListener('DOMContentLoaded', () => {
     // 1. Initialize data/state
+    const vocabManager = new VocabManager();
     const gameState = new GameState();
     
     // 2. Initialize UI
     const gameView = new GameView();
+    const adminView = new AdminView();
     
-    // 3. Initialize Controller orchestrator
-    const gameController = new GameController(gameState, gameView);
+    // 3. Initialize Controllers
+    const adminController = new AdminController(vocabManager, adminView);
+    const gameController = new GameController(gameState, gameView, vocabManager);
 
-    // Provide a global reference for debugging if needed, though not strictly required.
+    // 4. Admin access button
+    document.getElementById('admin-access-btn').addEventListener('click', () => {
+        adminController.requestAccess();
+    });
+
+    // Provide global references for debugging
     window.game = gameController;
+    window.admin = adminController;
 });

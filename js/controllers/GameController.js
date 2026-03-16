@@ -2,9 +2,10 @@
 //  GAME CONTROLLER
 // ====================================================================
 class GameController {
-    constructor(state, view, inputParams) {
+    constructor(state, view, vocabManager) {
         this.state = state;
         this.view = view;
+        this.vocabManager = vocabManager;
         this.input = new InputController((trackId) => this.handleInput(trackId));
 
         // Timers
@@ -111,7 +112,14 @@ class GameController {
     getVocab() {
         const phaseDef = GameConfig.phases[this.state.currentPhase];
         const lvl = phaseDef.levels[this.state.levelIndex];
-        return GameConfig.vocabularySets[lvl.vocabKey];
+        const vocabKey = lvl.vocabKey;
+
+        // Use VocabManager if available (merges built-in + custom)
+        if (this.vocabManager) {
+            const allSets = this.vocabManager.getAll();
+            return allSets[vocabKey] || GameConfig.vocabularySets[vocabKey];
+        }
+        return GameConfig.vocabularySets[vocabKey];
     }
 
     getRoundsPerLevel() {

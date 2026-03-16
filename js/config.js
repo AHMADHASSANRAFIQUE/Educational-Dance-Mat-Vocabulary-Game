@@ -10,6 +10,10 @@
 
 const GameConfig = {
 
+    // Admin authentication (SHA-256 hash of password)
+    // Default password: admin123  — Change this in production!
+    adminPasswordHash: '240be518fabd2724ddb6f04eeb1da5967448d7e831c08c8fa822809f74c720a9',
+
     // ----------------------------------------------------------------
     // VOCABULARY SETS
     // Each set has a name and word list. Levels reference these by key.

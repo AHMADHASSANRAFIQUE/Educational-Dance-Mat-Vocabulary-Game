@@ -107,6 +107,7 @@
                     <span class="diff-desc">Streams · Decoys</span>
                 </button>
             </div>
+            <button id="admin-access-btn" class="admin-start-btn">🔐 Admin Panel</button>
         </div>
 
         <!-- Game Over Overlay -->
@@ -163,15 +164,24 @@
             <button id="theme-close">Close</button>
         </div>
 
+        <!-- Admin Login Modal -->
+        <div id="admin-login-modal" class="admin-hidden"></div>
+
+        <!-- Admin Panel -->
+        <div id="admin-panel" class="admin-hidden"></div>
+
     </div>
 
     <script src="js/themes.js"></script>
-    <script src="js/config.js?v=6"></script>
+    <script src="js/config.js?v=7"></script>
     <script src="js/models/Analytics.js"></script>
+    <script src="js/models/VocabManager.js"></script>
     <script src="js/models/GameState.js"></script>
     <script src="js/views/GameView.js"></script>
+    <script src="js/views/AdminView.js"></script>
     <script src="js/controllers/InputController.js"></script>
+    <script src="js/controllers/AdminController.js"></script>
     <script src="js/controllers/GameController.js"></script>
-    <script src="js/main.js?v=5"></script>
+    <script src="js/main.js?v=6"></script>
 </body>
 </html>
