@@ -98,8 +98,8 @@ class GameController {
     }
 
     applyLevelSettings() {
-        const phaseDef = GameConfig.phases[this.state.currentPhase];
-        const lvl = phaseDef.levels[this.state.levelIndex];
+        const levels = this.getLevels();
+        const lvl = levels[this.state.levelIndex];
 
         if (this.state.currentMode !== 'static') {
             this.state.baseSpeed = lvl.speed;
@@ -110,8 +110,8 @@ class GameController {
     }
 
     getVocab() {
-        const phaseDef = GameConfig.phases[this.state.currentPhase];
-        const lvl = phaseDef.levels[this.state.levelIndex];
+        const levels = this.getLevels();
+        const lvl = levels[this.state.levelIndex];
         const vocabKey = lvl.vocabKey;
 
         // Use VocabManager if available (merges built-in + custom)
@@ -123,8 +123,15 @@ class GameController {
     }
 
     getRoundsPerLevel() {
-        const phaseDef = GameConfig.phases[this.state.currentPhase];
-        return phaseDef.levels[this.state.levelIndex].roundsPerLevel;
+        const levels = this.getLevels();
+        return levels[this.state.levelIndex].roundsPerLevel;
+    }
+
+    getLevels() {
+        if (this.vocabManager) {
+            return this.vocabManager.getMergedLevels(this.state.currentPhase);
+        }
+        return GameConfig.phases[this.state.currentPhase].levels;
     }
 
     scheduleNextRound(delayMs) {
@@ -375,11 +382,11 @@ class GameController {
 
         if (this.state.roundsCompleted >= this.getRoundsPerLevel()) {
             this.state.roundsCompleted = 0;
-            const phaseDef = GameConfig.phases[this.state.currentPhase];
-            if (this.state.levelIndex < phaseDef.levels.length - 1) {
+            const levels = this.getLevels();
+            if (this.state.levelIndex < levels.length - 1) {
                 this.state.levelIndex++;
                 this.applyLevelSettings();
-                this.view.showLevelUpBanner(phaseDef.levels[this.state.levelIndex].name);
+                this.view.showLevelUpBanner(levels[this.state.levelIndex].name);
                 this.scheduleNextRound(2200);
             } else {
                 setTimeout(() => this.endGame(), 1500);

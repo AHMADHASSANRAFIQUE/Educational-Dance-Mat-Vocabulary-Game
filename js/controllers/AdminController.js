@@ -56,6 +56,8 @@ class AdminController {
             onDeleteCategory: (key) => this.vocabManager.deleteCategory(key),
             onExport: () => this.vocabManager.exportJSON(),
             onImport: (json) => this.vocabManager.importJSON(json),
+            onAssignCategory: (phaseKey, vocabKey) => this.vocabManager.assignCategoryToMode(phaseKey, vocabKey),
+            onUnassignCategory: (phaseKey, vocabKey) => this.vocabManager.unassignCategoryFromMode(phaseKey, vocabKey),
         });
     }
 

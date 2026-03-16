@@ -105,6 +105,15 @@ class AdminView {
 
             <div class="admin-body">
                 ${this.activeCategory ? this.renderWordTable(allSets[this.activeCategory]) : '<p class="admin-empty">No categories yet. Create one above.</p>'}
+
+                <!-- Mode Assignments Section -->
+                <div class="admin-mode-section">
+                    <h3 class="admin-section-title">🎮 Category → Mode Assignments</h3>
+                    <p class="admin-section-hint">Assign categories to game modes. Custom categories will appear as extra levels when playing that mode.</p>
+                    <div class="admin-mode-grid">
+                        ${this.renderModeAssignments()}
+                    </div>
+                </div>
             </div>
 
             <div class="admin-footer">
@@ -116,6 +125,57 @@ class AdminView {
         `;
 
         this.bindPanelEvents();
+    }
+
+    renderModeAssignments() {
+        const phases = GameConfig.phases;
+        const modeIcons = { beginner: '🌱', intermediate: '🎵', advanced: '⚡' };
+        const allCategories = this.vocabManager.getCategories();
+        let html = '';
+
+        for (const [phaseKey, phaseDef] of Object.entries(phases)) {
+            const builtInKeys = phaseDef.levels.map(l => l.vocabKey);
+            const customAssignments = this.vocabManager.getModeAssignments(phaseKey);
+            const assignedKeys = customAssignments.map(a => a.vocabKey);
+
+            // Available categories to assign (not already built-in or assigned)
+            const availableToAssign = allCategories.filter(k =>
+                !builtInKeys.includes(k) && !assignedKeys.includes(k)
+            );
+
+            html += `
+                <div class="admin-mode-card">
+                    <div class="admin-mode-card-header">
+                        <span>${modeIcons[phaseKey] || '🎮'} <strong>${phaseDef.name}</strong></span>
+                        <span class="admin-mode-type">${phaseDef.mode}</span>
+                    </div>
+                    <div class="admin-mode-levels">
+                        ${phaseDef.levels.map(l => `
+                            <span class="admin-mode-level"><span class="admin-badge">built-in</span> ${l.name}</span>
+                        `).join('')}
+                        ${customAssignments.map(a => `
+                            <span class="admin-mode-level admin-mode-level-custom">
+                                <span class="admin-badge admin-badge-custom">custom</span> ${a.name}
+                                <button class="admin-mode-remove" data-phase="${phaseKey}" data-vocab="${a.vocabKey}" title="Remove">✕</button>
+                            </span>
+                        `).join('')}
+                    </div>
+                    ${availableToAssign.length > 0 ? `
+                        <div class="admin-mode-assign">
+                            <select class="admin-input admin-mode-select" data-phase="${phaseKey}">
+                                <option value="">+ Assign category...</option>
+                                ${availableToAssign.map(k => {
+                                    const wordCount = this.vocabManager.getSet(k).length;
+                                    return `<option value="${k}">${k} (${wordCount} words)</option>`;
+                                }).join('')}
+                            </select>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        return html;
     }
 
     renderWordTable(words) {
@@ -212,6 +272,28 @@ class AdminView {
         // Import / Export
         document.getElementById('admin-export-btn').addEventListener('click', () => this.callbacks.onExport());
         document.getElementById('admin-import-btn').addEventListener('click', () => this.showImportModal());
+
+        // Mode assignment: assign via dropdown
+        document.querySelectorAll('.admin-mode-select').forEach(select => {
+            select.addEventListener('change', () => {
+                const phaseKey = select.dataset.phase;
+                const vocabKey = select.value;
+                if (vocabKey) {
+                    this.callbacks.onAssignCategory(phaseKey, vocabKey);
+                    this.renderPanel();
+                }
+            });
+        });
+
+        // Mode assignment: remove
+        document.querySelectorAll('.admin-mode-remove').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const phaseKey = btn.dataset.phase;
+                const vocabKey = btn.dataset.vocab;
+                this.callbacks.onUnassignCategory(phaseKey, vocabKey);
+                this.renderPanel();
+            });
+        });
     }
 
     // ----------------------------------------------------------------
@@ -298,8 +380,11 @@ class AdminView {
         });
 
         // Save
-        document.getElementById('modal-save').addEventListener('click', () => {
+        const saveBtn = document.getElementById('modal-save');
+        saveBtn.addEventListener('click', async () => {
             const errEl = document.getElementById('modal-error');
+            const btnOriginalText = saveBtn.innerText;
+            
             const wordObj = {
                 id: document.getElementById('modal-word-id').value.trim().toLowerCase().replace(/\s+/g, '_'),
                 en: document.getElementById('modal-word-en').value.trim(),
@@ -310,6 +395,29 @@ class AdminView {
             if (!wordObj.id || !wordObj.en) {
                 errEl.innerText = 'Word ID and English are required.';
                 return;
+            }
+
+            // Auto-translate to Hebrew if empty
+            if (!wordObj.he) {
+                try {
+                    saveBtn.innerText = 'Translating...';
+                    saveBtn.disabled = true;
+                    errEl.innerText = '';
+                    
+                    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(wordObj.en)}&langpair=en|he`);
+                    const data = await res.json();
+                    
+                    if (data && data.responseData && data.responseData.translatedText) {
+                        wordObj.he = data.responseData.translatedText;
+                        document.getElementById('modal-word-he').value = wordObj.he; // Show it in the UI
+                    }
+                } catch (e) {
+                    console.error('Translation failed:', e);
+                    // Silently fail and continue without hebrew if API fails
+                } finally {
+                    saveBtn.innerText = btnOriginalText;
+                    saveBtn.disabled = false;
+                }
             }
 
             let result;
