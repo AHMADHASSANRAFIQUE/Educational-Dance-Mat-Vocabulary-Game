@@ -39,9 +39,12 @@ class GameView {
         this.feedbackTimeout = null;
         this.levelBannerTimeout = null;
         this.adaptiveTimeout = null;
+
+        // Theme
+        this.themePanel = document.getElementById('theme-panel');
     }
 
-    bindEvents(onStartRequest, onRestartRequest, onTTSggle, onDashboardToggle, onCloseDashboard, onExportCSV, onClearData, onLangToggle) {
+    bindEvents(onStartRequest, onRestartRequest, onTTSggle, onDashboardToggle, onCloseDashboard, onExportCSV, onClearData, onLangToggle, onThemeSelect) {
         document.querySelectorAll('.diff-btn').forEach(btn => {
             btn.addEventListener('click', () => onStartRequest(btn.dataset.phase));
         });
@@ -61,6 +64,11 @@ class GameView {
                 if(onLangToggle) onLangToggle();
             });
         }
+
+        // Theme button
+        document.getElementById('theme-toggle').addEventListener('click', () => this.openThemePicker());
+        document.getElementById('theme-close').addEventListener('click', () => this.closeThemePicker());
+        this._onThemeSelect = onThemeSelect;
 
         document.getElementById('dashboard-toggle').addEventListener('click', onDashboardToggle);
         document.getElementById('dashboard-close').addEventListener('click', onCloseDashboard);
@@ -289,6 +297,69 @@ class GameView {
         if(tz) {
             tz.classList.add('active');
             setTimeout(() => tz.classList.remove('active'), 120);
+        }
+    }
+
+    // ================================================================
+    // THEME SYSTEM
+    // ================================================================
+    applyTheme(themeKey) {
+        const theme = GameThemes[themeKey];
+        if (!theme) return;
+
+        const root = document.documentElement;
+        for (const [prop, value] of Object.entries(theme.vars)) {
+            root.style.setProperty(`--${prop}`, value);
+        }
+
+        // Set data-theme for CSS overrides (e.g., light mode)
+        root.dataset.theme = themeKey;
+
+        // Update active state on theme cards if picker is open
+        document.querySelectorAll('.theme-card').forEach(card => {
+            card.classList.toggle('theme-active', card.dataset.theme === themeKey);
+        });
+    }
+
+    openThemePicker() {
+        this.renderThemePicker();
+        this.themePanel.classList.remove('theme-hidden');
+    }
+
+    closeThemePicker() {
+        this.themePanel.classList.add('theme-hidden');
+    }
+
+    renderThemePicker() {
+        const grid = this.themePanel.querySelector('.theme-grid');
+        if (!grid) return;
+        grid.innerHTML = '';
+
+        const currentTheme = document.documentElement.dataset.theme || 'midnight';
+
+        for (const [key, theme] of Object.entries(GameThemes)) {
+            const card = document.createElement('div');
+            card.className = `theme-card ${key === currentTheme ? 'theme-active' : ''}`;
+            card.dataset.theme = key;
+
+            const colors = [theme.vars['color-pink'], theme.vars['color-purple'], theme.vars['color-green'], theme.vars['color-orange']];
+            const dotsHtml = colors.map(c => `<span class="theme-color-dot" style="background:${c}"></span>`).join('');
+
+            card.innerHTML = `
+                <span class="theme-card-icon">${theme.icon}</span>
+                <span class="theme-card-name">${theme.name}</span>
+                <div class="theme-card-preview">${dotsHtml}</div>
+            `;
+
+            card.addEventListener('click', () => {
+                if (this._onThemeSelect) this._onThemeSelect(key);
+                this.applyTheme(key);
+                // Update active states
+                grid.querySelectorAll('.theme-card').forEach(c => c.classList.remove('theme-active'));
+                card.classList.add('theme-active');
+            });
+
+            grid.appendChild(card);
         }
     }
 }

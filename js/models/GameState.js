@@ -25,6 +25,7 @@ class GameState {
         this.feverActive = false;
 
         this.language = 'en'; // 'en' or 'he'
+        this.theme = localStorage.getItem('gameTheme') || 'midnight';
 
         this.analytics = new Analytics();
     }
@@ -43,6 +44,13 @@ class GameState {
     toggleLanguage() {
         this.language = this.language === 'en' ? 'he' : 'en';
         return this.language;
+    }
+
+    setTheme(themeKey) {
+        if (GameThemes[themeKey]) {
+            this.theme = themeKey;
+            localStorage.setItem('gameTheme', themeKey);
+        }
     }
 
     addScore(points, rating, word) {

@@ -1,10 +1,22 @@
 :root {
     --color-bg: #0f0c29;
+    --color-bg-end: #1a1a3e;
     --color-pink: #ff66aa;
     --color-purple: #8c52ff;
     --color-green: #38d9a9;
     --color-orange: #ff914d;
     --color-text: #ffffff;
+    --color-accent: #5ce1e6;
+    --color-gold: #ffd700;
+    --hud-bg: rgba(0,0,0,0.4);
+    --overlay-bg: rgba(10,8,30,0.97);
+    --card-bg: rgba(255,255,255,0.06);
+    --card-border: rgba(255,255,255,0.15);
+    --prompt-bg: rgba(255,255,255,0.95);
+    --prompt-shadow: rgba(140,82,255,0.3);
+    --board-top: rgba(0,0,0,0.6);
+    --board-bottom: rgba(0,0,0,0.1);
+    --track-line: rgba(255,255,255,0.05);
     --track-width: 140px;
     --board-height: 55vh;
 }
@@ -14,6 +26,7 @@
 body {
     background-color: var(--color-bg);
     color: var(--color-text);
+    transition: background-color 0.4s, color 0.4s;
     font-family: 'Nunito', sans-serif;
     overflow: hidden;
     user-select: none;
@@ -27,12 +40,13 @@ body {
     display: flex;
     flex-direction: column;
     position: relative;
-    background: radial-gradient(ellipse at 50% 30%, #1a1a3e 0%, #0f0c29 70%);
+    background: radial-gradient(ellipse at 50% 30%, var(--color-bg-end) 0%, var(--color-bg) 70%);
     transition: background 0.5s;
 }
 
 #game-container.fever-active {
-    background: radial-gradient(ellipse at 50% 30%, #2a1a4e 0%, #1a0c39 70%);
+    background: radial-gradient(ellipse at 50% 30%, var(--color-bg-end) 0%, var(--color-bg) 70%);
+    filter: brightness(1.15) saturate(1.2);
 }
 
 /* ================ HUD ================ */
@@ -41,8 +55,8 @@ body {
     justify-content: space-around;
     align-items: center;
     padding: 10px 16px;
-    background: rgba(0,0,0,0.4);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    background: var(--hud-bg);
+    border-bottom: 1px solid var(--card-border);
     z-index: 10;
     gap: 8px;
 }
@@ -61,6 +75,7 @@ body {
     font-family: 'Fredoka One', cursive;
     font-size: 28px;
     text-shadow: 0 0 15px rgba(255,255,255,0.3);
+    color: var(--color-text);
 }
 
 .hud-mode-text { font-size: 16px; }
@@ -68,8 +83,8 @@ body {
 .hud-controls { display: flex; gap: 6px; }
 
 .hud-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.15);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
     color: white;
     font-size: 18px;
     width: 38px; height: 38px;
@@ -80,7 +95,7 @@ body {
 }
 .hud-btn:hover { background: rgba(255,255,255,0.2); }
 .hud-btn:active { transform: scale(0.92); }
-.hud-btn.active { background: rgba(92, 225, 230, 0.3); border-color: #5ce1e6; }
+.hud-btn.active { background: rgba(92, 225, 230, 0.3); border-color: var(--color-accent); }
 
 /* ================ PICTURE PROMPT ================ */
 #picture-prompt-area {
@@ -105,9 +120,9 @@ body {
     max-width: 280px;
     object-fit: contain;
     border-radius: 16px;
-    background: rgba(255,255,255,0.95);
+    background: var(--prompt-bg);
     padding: 10px;
-    box-shadow: 0 0 40px rgba(140, 82, 255, 0.3), 0 8px 30px rgba(0,0,0,0.4);
+    box-shadow: 0 0 40px var(--prompt-shadow), 0 8px 30px rgba(0,0,0,0.4);
     transition: opacity 0.6s ease;
 }
 
@@ -132,7 +147,7 @@ body {
     z-index: 20;
 }
 
-.feedback-perfect { color: #5ce1e6; text-shadow: 0 0 25px #5ce1e6; }
+.feedback-perfect { color: var(--color-accent); text-shadow: 0 0 25px var(--color-accent); }
 .feedback-good    { color: #84e058; text-shadow: 0 0 25px #84e058; }
 .feedback-miss    { color: #ff6688; text-shadow: 0 0 25px #ff6688; }
 
@@ -186,7 +201,7 @@ body {
     height: var(--board-height);
     position: relative;
     border-top: 2px solid rgba(255,255,255,0.06);
-    background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.1) 100%);
+    background: linear-gradient(to bottom, var(--board-top) 0%, var(--board-bottom) 100%);
     padding: 0 20px;
 }
 
@@ -194,9 +209,9 @@ body {
     width: var(--track-width);
     height: 100%;
     position: relative;
-    background: linear-gradient(to bottom, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0) 30%, rgba(255,255,255,0) 70%, rgba(255,255,255,0.02) 100%);
-    border-left: 1px solid rgba(255,255,255,0.05);
-    border-right: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(to bottom, var(--track-line) 0%, transparent 30%, transparent 70%, var(--track-line) 100%);
+    border-left: 1px solid var(--track-line);
+    border-right: 1px solid var(--track-line);
 }
 
 /* ================ TARGET ZONES ================ */
@@ -261,7 +276,7 @@ body {
 .overlay {
     position: absolute;
     inset: 0;
-    background: rgba(10, 8, 30, 0.97);
+    background: var(--overlay-bg);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -277,7 +292,7 @@ body {
     font-size: 3rem;
     line-height: 1.1;
     margin-bottom: 10px;
-    background: linear-gradient(135deg, #5ce1e6, #8c52ff);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-purple));
     -webkit-background-clip: text;
     background-clip: text;
     -webkit-text-fill-color: transparent;
@@ -310,8 +325,8 @@ body {
     gap: 4px;
     padding: 18px 24px;
     border-radius: 18px;
-    border: 2px solid rgba(255,255,255,0.15);
-    background: rgba(255,255,255,0.06);
+    border: 2px solid var(--card-border);
+    background: var(--card-bg);
     color: white;
     cursor: pointer;
     transition: all 0.2s;
@@ -333,7 +348,7 @@ body {
     padding: 14px 44px;
     font-size: 22px;
     font-family: 'Fredoka One', cursive;
-    background: linear-gradient(135deg, #5ce1e6, #8c52ff);
+    background: linear-gradient(135deg, var(--color-accent), var(--color-purple));
     color: white;
     border: none;
     border-radius: 50px;
@@ -438,7 +453,7 @@ body {
 #dashboard-panel {
     position: absolute;
     inset: 0;
-    background: rgba(10, 8, 30, 0.98);
+    background: var(--overlay-bg);
     z-index: 200;
     display: flex;
     flex-direction: column;
@@ -458,7 +473,7 @@ body {
 #dashboard-header h2 {
     font-family: 'Fredoka One', cursive;
     font-size: 24px;
-    color: #5ce1e6;
+    color: var(--color-accent);
 }
 
 #dashboard-body { flex: 1; overflow-y: auto; }
@@ -558,3 +573,113 @@ body {
 
 .img-pop   { animation: imgPop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 .img-shake { animation: shake 0.4s ease; }
+
+/* ================ THEME PICKER ================ */
+#theme-panel {
+    position: absolute;
+    inset: 0;
+    background: var(--overlay-bg);
+    z-index: 250;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px;
+}
+
+#theme-panel.theme-hidden { display: none !important; }
+
+#theme-panel h2 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 28px;
+    color: var(--color-accent);
+    margin-bottom: 24px;
+}
+
+.theme-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: center;
+    max-width: 700px;
+}
+
+.theme-card {
+    width: 120px;
+    padding: 16px 10px;
+    border-radius: 16px;
+    border: 3px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--color-text);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+}
+
+.theme-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.theme-card.theme-active {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 20px var(--prompt-shadow);
+}
+
+.theme-card-icon { font-size: 32px; }
+
+.theme-card-name {
+    font-family: 'Fredoka One', cursive;
+    font-size: 14px;
+}
+
+.theme-card-preview {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+}
+
+.theme-color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    border: 1px solid rgba(255,255,255,0.2);
+}
+
+#theme-close {
+    margin-top: 24px;
+    padding: 10px 30px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 16px;
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    color: var(--color-text);
+    border-radius: 30px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+#theme-close:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+/* ================ LIGHT MODE OVERRIDES ================ */
+[data-theme="light"] .hud-btn { color: #333; }
+[data-theme="light"] .hud-btn:hover { background: rgba(0,0,0,0.08); }
+[data-theme="light"] .overlay-subtitle,
+[data-theme="light"] .overlay-hint { color: rgba(0,0,0,0.55); }
+[data-theme="light"] .diff-btn { color: #333; }
+[data-theme="light"] #prompt-label { color: rgba(0,0,0,0.6); }
+[data-theme="light"] .hud-label { color: rgba(0,0,0,0.5); }
+[data-theme="light"] .static-block,
+[data-theme="light"] .vocab-block { color: white; }
+[data-theme="light"] #gameover-title { color: #f57f17; }
+[data-theme="light"] .final-value { color: #f57f17; }
+[data-theme="light"] .dash-btn { color: #333; }
+[data-theme="light"] .theme-color-dot { border-color: rgba(0,0,0,0.15); }
+[data-theme="light"] .theme-card { color: #333; }
+

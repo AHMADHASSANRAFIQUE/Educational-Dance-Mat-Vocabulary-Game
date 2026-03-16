@@ -23,9 +23,13 @@ class GameController {
             () => this.view.closeDashboard(),
             () => this.state.analytics.exportCSV(),
             () => { this.state.analytics.clear(); this.view.renderDashboard(this.state.analytics.getAll()); },
-            () => this.handleLanguageToggle()
+            () => this.handleLanguageToggle(),
+            (themeKey) => this.state.setTheme(themeKey)
         );
         this.view.updateLanguageToggleUI(this.state.language);
+
+        // Apply saved theme on init
+        this.view.applyTheme(this.state.theme);
     }
 
     handleLanguageToggle() {
